@@ -15,7 +15,10 @@ export const login = async ({
     });
     return response.data;
   } catch (error: any) {
-    return error;
+    if (error.response && error.response.status === 400) {
+      throw new Error("Invalid credentials");
+    }
+    throw error; // Re-throw other errors
   }
 };
 

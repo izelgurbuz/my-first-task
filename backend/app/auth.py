@@ -51,6 +51,7 @@ async def register_user(user_data: UserCreate):
 
 # Authenticate a user
 async def authenticate_user(user_data: UserLogin):
+    print(user_data)
     user = users_collection.find_one({"email": user_data.email})
     if not user or not verify_password(user_data.password, user["password"]):
         raise HTTPException(status_code=400, detail="Invalid credentials")

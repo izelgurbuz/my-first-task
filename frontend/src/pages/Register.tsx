@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { register } from "../api/authApi";
 import "../style/Login-Register.scss";
+import { useNavigate } from "react-router-dom";
 
 const Register = () => {
   const [name, setName] = useState("");
@@ -9,11 +10,13 @@ const Register = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false); // State to track loading
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const { mutateAsync: createUser } = useMutation({
     mutationFn: register,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["createUser"] });
+    onSuccess: (data) => {
+      localStorage.setItem("token", data.access_token);
+      navigate("/");
     },
   });
 

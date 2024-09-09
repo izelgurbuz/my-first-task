@@ -19,16 +19,20 @@ app.add_middleware(
 async def register(user: UserCreate):
     try:
         user = await register_user(user)
-        return {"msg": "User registered successfully", "user": user}
+        access_token = create_access_token(data={"sub": str(user["_id"])})
+        return {"msg": "User registered successfully", "access_token": access_token}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
 @app.post("/login")
-async def login(form_data: OAuth2PasswordRequestForm = Depends()):
-    user = await authenticate_user(UserLogin(email=form_data.username, password=form_data.password))
-    user["_id"] = str(user["_id"])
-    access_token_expires = timedelta(minutes=30)
-    access_token = create_access_token(
-        data={"sub": str(user["_id"])}, expires_delta=access_token_expires
-    )
-    return {"access_token": access_token, "token_type": "bearer"}
+async def login(userdata: UserLogin):
+    try:
+        user = await authenticate_user(UserLogin(email=userdata.email, password=userdata.password))
+        user["_id"] = str(user["_id"])
+        access_token_expires = timedelta(minutes=30)
+        access_token = create_access_token(
+            data={"sub": str(user["_id"])}, expires_delta=access_token_expires
+        )
+        return {"access_token": access_token, "token_type": "bearer"}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
