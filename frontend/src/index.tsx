@@ -7,6 +7,8 @@ import Register from "./pages/Register";
 import Home from "./pages/Home";
 import { NotFoundPage } from "./pages/NotFoundPage";
 import Login from "./pages/Login";
+import PrivateRoute from "./PrivateRoute";
+import DummyPage from "./pages/DummyPage";
 
 // Create a client
 const queryClient = new QueryClient();
@@ -14,7 +16,20 @@ const queryClient = new QueryClient();
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Home />,
+    element: (
+      <PrivateRoute>
+        <Home />
+      </PrivateRoute>
+    ),
+    errorElement: <NotFoundPage />,
+  },
+  {
+    path: "/dummy",
+    element: (
+      <PrivateRoute>
+        <DummyPage />
+      </PrivateRoute>
+    ),
     errorElement: <NotFoundPage />,
   },
   {
