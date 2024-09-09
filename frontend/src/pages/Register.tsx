@@ -13,18 +13,17 @@ const Register = () => {
   const { mutateAsync: createUser } = useMutation({
     mutationFn: register,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["fetchJobs"] });
+      queryClient.invalidateQueries({ queryKey: ["createUser"] });
     },
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     setLoading(true); // Set loading to true before calling the mutation
     try {
-      await createUser({ name, email, password });
-      alert("User registered successfully!");
+      await createUser({ username: name, email, password });
     } catch (error) {
       console.error("Error during registration:", error);
-      alert("Registration failed!");
     } finally {
       setLoading(false); // Set loading to false after the mutation
     }
@@ -35,6 +34,13 @@ const Register = () => {
       <h2>Register</h2>
       <form onSubmit={handleSubmit}>
         <div>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Name"
+            required
+          />
           <input
             type="email"
             value={email}

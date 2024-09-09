@@ -6,6 +6,8 @@ from app.models import UserCreate, UserLogin
 from jose import jwt
 from datetime import datetime, timedelta
 import os
+from fastapi.encoders import jsonable_encoder
+
 
 # Load secret key for JWT
 SECRET_KEY = os.getenv("SECRET_KEY", "mysecret")
@@ -13,7 +15,7 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 # Context for password hashing
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 
 # Hash the password
 def get_password_hash(password):
@@ -43,8 +45,9 @@ async def register_user(user_data: UserCreate):
     hashed_password = get_password_hash(user_data.password)
     user_dict = user_data.dict()
     user_dict["password"] = hashed_password
-    users_collection.insert_one(user_dict)
-    return user_dict
+    result = users_collection.insert_one(user_dict)
+    user_dict["_id"] = str(result.inserted_id)
+    return jsonable_encoder(user_dict)
 
 # Authenticate a user
 async def authenticate_user(user_data: UserLogin):

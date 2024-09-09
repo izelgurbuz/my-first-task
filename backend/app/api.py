@@ -3,17 +3,30 @@ from app.models import UserCreate, UserLogin
 from app.auth import register_user, authenticate_user, create_access_token
 from fastapi.security import OAuth2PasswordRequestForm
 from datetime import timedelta
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
+# Set up CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allow all origins for development. In production, you should specify domains.
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all methods (GET, POST, PUT, DELETE, etc.)
+    allow_headers=["*"],  # Allow all headers
+)
 @app.post("/register")
 async def register(user: UserCreate):
-    user = await register_user(user)
-    return {"msg": "User registered successfully", "user": user}
+    try:
+        user = await register_user(user)
+        return {"msg": "User registered successfully", "user": user}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 @app.post("/login")
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     user = await authenticate_user(UserLogin(email=form_data.username, password=form_data.password))
+    user["_id"] = str(user["_id"])
     access_token_expires = timedelta(minutes=30)
     access_token = create_access_token(
         data={"sub": str(user["_id"])}, expires_delta=access_token_expires
